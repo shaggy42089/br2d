@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let wsocket = new WebSocket('ws://localhost:9696', 'echo-protocol')
+        let direction = [0,0];
+        let movementKeys = [
+            {direction:[0,-1], key:'z'},
+            {direction:[-1,0], key:'q'},
+            {direction:[0,1], key:'s'},
+            {direction:[1,0], key:'d'}
+        ]
+
+        wsocket.onclose = (e) => {
+            console.log('server closed')
+        }
+
+        wsocket.onopen = (e) => {
+            console.log('connection successful');
+            wsocket.send(JSON.stringify({type:'init', data:{name:'shaggy'}}))
+        }
+
+        wsocket.onmessage = (e) => {
+            console.log('message received : ' + e.data)
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.repeat) return;
+            movementKeys.forEach(m => {
+                if (event.key === m.key) {
+                    direction[0] = m.direction[0] || direction[0]
+                    direction[1] = m.direction[1] || direction[1]
+
+                    wsocket.send(JSON.stringify({type:'command', data:{name:'move', args:direction}}))
+                }
+            })
+        })
+
+        document.addEventListener('keyup', (event) => {
+            if (event.repeat) return;
+            movementKeys.forEach(m => {
+                if (event.key === m.key) {
+                    direction[0] = (m.direction[0] || direction[0]) - m.direction[0]
+                    direction[1] = (m.direction[1] || direction[1]) - m.direction[1]
+
+                    wsocket.send(JSON.stringify({type:'command', data:{name:'move', args:direction}}))
+                }
+            })
+        })
+    </script>
+</body>
+</html>

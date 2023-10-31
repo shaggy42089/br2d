@@ -9,11 +9,10 @@ let items = []
 
 players.push(new Player("toto"))
 
-for (let i=0; i<players.length; ++i) {
-    //todo : better shit
-    players[i].x= constTab.borderOffset + (i%2)*(constTab.width/2-constTab.borderOffset);
-    players[i].y= constTab.borderOffset + Math.floor(i/2)*(constTab.height/2-constTab.borderOffset);
-}
+players.forEach(p => {
+    p.x= constTab.borderOffset + (i%2)*(constTab.width/2-constTab.borderOffset);
+    p.y= constTab.borderOffset + Math.floor(i/2)*(constTab.height/2-constTab.borderOffset);
+})
 
 let itemCount = constTab.ItemThreshold[0] + Math.floor(Math.random()*(constTab.ItemThreshold[1]-constTab.ItemThreshold[0]))
 
@@ -27,11 +26,14 @@ class Game {
     #items;
 
 
-    constructor ()
+    constructor (players, items) {
+        this.#players = players;
+        this.#items = items;
+    }
 
-    tick() {
-        for (let p of players) {
-            p.updatePosition()
-        }
+    tick(delta) {
+        players.forEach(p => p.updatePosition())
+
+
     }
 }

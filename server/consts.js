@@ -5,6 +5,7 @@ const constTab = {
     speed :5, // px/s
     playerHealth :100,
     playerLimit: 4,
+    playerSlots: 3,
     itemThreshold: [50, 100],
     tickRate: 32,
 }

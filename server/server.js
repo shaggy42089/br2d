@@ -1,6 +1,8 @@
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 const { constTab, isJson, hasProps } = require('./consts');
+const { Game } = require('./game')
+const { Player } = require('./classes/Player');
 
 let server = http.createServer(function(request, response) {
     console.log((new Date()) + ' Received request for ' + request.url);
@@ -27,7 +29,7 @@ function originIsAllowed(origin) {
     return true;
 }
 
-let connections = []
+let game = new Game()
 
 wServer.on('request', function(request) {
     if (!originIsAllowed(request.origin)) {
@@ -67,11 +69,12 @@ wServer.on('request', function(request) {
                 }
 
                 connection.data = {}
-                connection.data.name = obj.data.name;
+                connection.data.player = new Player(obj.data.name);
+                game.addPlayer(connection.data.player);
                 connection.send('initialization successful, welcome, '+obj.data.name);
                 break;
             case 'command':
-                if (!obj.data || typeof obj.data !== 'object' || !(hasProps(['name', 'args'], obj.data))) {
+                if (!obj.data || typeof obj.data !== 'object' || !(hasProps(['name'], obj.data))) {
                     connection.send('missing or invalid \'data\' field');
                     return;
                 }
@@ -89,7 +92,19 @@ wServer.on('request', function(request) {
                             return;
                         }
 
-                        console.log('player ' + connection.data.name + ' is going ' + obj.data.args)
+                        console.log('player ' + connection.data.player.name + ' want to go ' + obj.data.args)
+                        connection.data.player.plannedDirection = obj.data.args;
+                        break;
+                    case 'beReady':
+                        if (game.isRunning) return;
+                        connection.data.player.isReady = true;
+                        console.log("player " + connection.data.player.name + " is ready")
+                        game.checkStart();
+                        break;
+
+                    case 'cancel':
+                        connection.data.player.isReady = false;
+                        console.log("player " + connection.data.player.name + " has canceled")
                         break;
                 }
 

@@ -39,6 +39,14 @@
                     wsocket.send(JSON.stringify({type:'command', data:{name:'move', args:direction}}))
                 }
             })
+
+            if (event.key === 'p') {
+                wsocket.send(JSON.stringify({type:'command', data:{name:'beReady'}}))
+            }
+
+            if (event.key === 'c') {
+                wsocket.send(JSON.stringify({type:'command', data:{name:'cancel'}}))
+            }
         })
 
         document.addEventListener('keyup', (event) => {
